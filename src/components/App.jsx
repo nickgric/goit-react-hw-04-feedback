@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 
 import { Section } from './Section';
 import { Statistics } from './Statistics';
 import { FeedbackOptions } from './FeedbackOptions';
 import { Notification } from './Notification';
 
-export class App extends Component {
-  state = {
+export const App = () => {
+  const initialState = {
     excellent: 0,
     good: 0,
     neutral: 0,
@@ -14,60 +14,54 @@ export class App extends Component {
     terrible: 0,
   };
 
-  onLeaveFeedback = event => {
+  const [options, setOptions] = useState(initialState);
+
+  const onLeaveFeedback = event => {
     const { name } = event.target;
-    return this.setState(prevState => ({
+    return setOptions(prevState => ({
+      ...prevState,
       [name]: prevState[name] + 1,
     }));
   };
 
-  countTotalFeedback = () => {
-    return Object.values(this.state).reduce((a, b) => a + b, 0);
+  const countTotalFeedback = () => {
+    return Object.values(options).reduce((a, b) => a + b, 0);
   };
 
-  countFeedbackPercentage = () => {
+  const countFeedbackPercentage = () => {
     const FeedbackPercentage = {};
-    Object.entries(this.state).forEach(option => {
+    Object.entries(options).forEach(option => {
       const name = option[0];
       const result =
-        this.countTotalFeedback() === 0
+        countTotalFeedback() === 0
           ? 0
-          : (option[1] / this.countTotalFeedback()) * 100;
+          : (option[1] / countTotalFeedback()) * 100;
       FeedbackPercentage[name] = result;
     });
     return FeedbackPercentage;
   };
 
-  render() {
-    const {
-      onLeaveFeedback,
-      countTotalFeedback,
-      countFeedbackPercentage,
-      state,
-    } = this;
-
-    return (
-      <>
-        <h1>React-HW02_01 @nickgric</h1>
-        <Section title="Please leave (positive) feedback">
-          <FeedbackOptions
-            options={Object.keys(state)}
-            onLeaveFeedback={onLeaveFeedback}
+  return (
+    <>
+      <h1>React-HW04_01 @nickgric</h1>
+      <Section title="Please leave (positive) feedback">
+        <FeedbackOptions
+          options={Object.keys(options)}
+          onLeaveFeedback={onLeaveFeedback}
+        />
+      </Section>
+      <Section title="Statistics">
+        {countTotalFeedback() !== 0 && (
+          <Statistics
+            options={options}
+            total={countTotalFeedback()}
+            feedbackPercentage={countFeedbackPercentage()}
           />
-        </Section>
-        <Section title="Statistics">
-          {countTotalFeedback() !== 0 && (
-            <Statistics
-              options={state}
-              total={countTotalFeedback()}
-              feedbackPercentage={countFeedbackPercentage()}
-            />
-          )}
-          {countTotalFeedback() === 0 && (
-            <Notification message="No feedback given" />
-          )}
-        </Section>
-      </>
-    );
-  }
-}
+        )}
+        {countTotalFeedback() === 0 && (
+          <Notification message="No feedback given" />
+        )}
+      </Section>
+    </>
+  );
+};
